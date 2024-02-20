@@ -89,15 +89,23 @@ endif()
 
 function(abc_properties target visibility)
     target_include_directories(${target} ${visibility} ${CMAKE_CURRENT_SOURCE_DIR}/src )
-    target_compile_options_filtered(${target} ${visibility} ${ABC_CFLAGS} ${ABC_CXXFLAGS} -Wno-unused-but-set-variable )
+    target_compile_options_filtered(${target} ${visibility}  ${ABC_CFLAGS} ${ABC_CXXFLAGS} -Wno-unused-but-set-variable )
     target_link_libraries(${target} ${visibility} ${ABC_LIBS})
+endfunction()
+
+function(libabc_properties target)
+    target_include_directories(
+        ${target} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+                            $<INSTALL_INTERFACE:src>)
+    target_compile_options_filtered(${target} PRIVATE ${ABC_CFLAGS} ${ABC_CXXFLAGS} -Wno-unused-but-set-variable )
+    target_link_libraries(${target} PRIVATE ${ABC_LIBS})
 endfunction()
 
 set(ABC_MAIN_SRC src/base/main/main.c)
 list(REMOVE_ITEM ABC_SRC ${ABC_MAIN_SRC})
 
 add_library(libabc EXCLUDE_FROM_ALL ${ABC_SRC})
-abc_properties(libabc PUBLIC)
+libabc_properties(libabc)
 set_property(TARGET libabc PROPERTY OUTPUT_NAME abc)
 
 add_executable(abc ${ABC_MAIN_SRC})
